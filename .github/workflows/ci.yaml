@@ -26,6 +26,6 @@ jobs:
       - name: Send twist notification
         uses: Doist/twist-post-action@master
         with:
-          message: 🛫 ${{ github.repository }} @ `${{ github.sha }}` / ${{ github.ref_name }} is **${{ needs.build_and_test.result }}**\n\nSee [Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more info.
+          message: ${{ needs.build_and_test.result == "success" && "✅" || "❌"}} ${{ github.repository }} [[${{ github.action}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})] **${{ needs.build_and_test.result }}**
           install_id: ${{ secrets.TWIST_INTEGRATION_INSTALL_ID }}
           install_token: ${{ secrets.TWIST_INTEGRATION_INSTALL_TOKEN }}
