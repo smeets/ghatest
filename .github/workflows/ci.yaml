@@ -26,6 +26,9 @@ jobs:
       - name: Send twist notification
         uses: Doist/twist-post-action@master
         with:
-          message: "🛫 ${{ github.repository }} @ `${{ github.sha }}` / ${{ github.ref_name }} is **passing** or **failing**"
+          message: >
+            🛫 ${{ github.repository }} @ `${{ github.sha }}` / ${{ github.ref_name }} is **passing** or **failing**
+            - ${{ jobs.build_and_test.result }}
+            - [Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
           install_id: ${{ secrets.TWIST_INTEGRATION_INSTALL_ID }}
           install_token: ${{ secrets.TWIST_INTEGRATION_INSTALL_TOKEN }}
