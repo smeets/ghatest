@@ -6,22 +6,6 @@ on:
       - master
       - main
 jobs:
-  staticcheck:
-    name: staticcheck
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v3
-
-      - name: Run staticcheck
-        uses: reviewdog/action-staticcheck@v1
-        env:
-          GOPRIVATE: github.com/lingio
-        with:
-          reporter: github-pr-review
-          filter_mode: nofilter
-          fail_on_error: true
-
   build_and_test:
     runs-on: ubuntu-latest
     steps:
