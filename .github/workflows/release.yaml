@@ -1,0 +1,36 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "*"
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          cache: true
+          go-version-file: "go.mod"
+      - run: go build .
+      - run: go test .
+
+  twist_notification:
+    name: Send a message to Twist.
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs: build_and_test
+    steps:
+      - name: Get release metadata
+        run: curl -fsSl https://api.github.com/repos/${{github.repository}}/releases/tag/${{ github.ref_name }} > release.json
+      - run: echo ${{ needs.build_and_test.result == 'success' && '✅' || '❌'}} ${{ github.repository }} [${{ github.base_ref || github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) deploy **${{ needs.build_and_test.result }}** for `${{ github.sha }}` > message
+      - run: cat release.json | jq '("\n\n```\n" + .body' + "\n```")' >> message
+      - run: jq -c --rawfile message message -n -- '{content:$message}' > payload.json
+      - name: Send twist notification
+        shell: bash
+        run: >
+          curl --fail --silent --header "Content-Type: application/json"
+          --request POST
+          --data @payload.json
+          "https://twist.com/api/v3/integration_incoming/post_data?install_id=${{ secrets.TWIST_INTEGRATION_INSTALL_ID }}&install_token=${{ secrets.TWIST_INTEGRATION_INSTALL_TOKEN }}"
