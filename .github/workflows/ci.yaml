@@ -32,7 +32,7 @@ jobs:
           ${{ github.event.head_commit.message }}
           \`\`\`
           EOF
-      - run: jq -c --rawfile message message -n -- '{content:$message}' > payload.json
+      - run: jq -c --rawfile message message '{content:$message}' -n -- > payload.json
       - name: Send twist notification
         shell: bash
         run: >
