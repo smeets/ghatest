@@ -26,10 +26,12 @@ jobs:
       - shell: bash
         run: |
           cat message <<EOF
-          ${{ needs.build_and_test.result == 'success' && '✅' || '❌'}} ${{ github.repository }} [${{ github.base_ref || github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) deploy **${{ needs.build_and_test.result }}** for `${{ github.sha }}`
+          ${{ needs.build_and_test.result == 'success' && '✅' || '❌'}} ${{ github.repository }} [${{ github.base_ref || github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) deploy **${{ needs.build_and_test.result }}** for \`${{ github.sha }}\`
+
+          \`\`\`
+          ${{ github.event.head_commit.message }}
+          \`\`\`
           EOF
-      - run: echo "{\"body\":\"${{ github.event.head_commit.message }}\"}" | jq -c . > release.json
-      - run: cat release.json | jq '("\n\n```\n" + .body' + "\n```")' >> message
       - run: jq -c --rawfile message message -n -- '{content:$message}' > payload.json
       - name: Send twist notification
         shell: bash
