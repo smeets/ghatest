@@ -18,12 +18,13 @@ jobs:
       - run: go test .
 
   twist_notification:
-    name: Send a message to Twist.
+    name: Report deploy result to twist.
     runs-on: ubuntu-latest
     if: ${{ always() }}
     needs: build_and_test
     steps:
-      - shell: bash
+      - name: Format twist message
+        shell: bash
         run: |
           tee message <<EOF
           ${{ needs.build_and_test.result == 'success' && '✅' || '❌'}} ${{ github.repository }} [${{ github.base_ref || github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) deploy **${{ needs.build_and_test.result }}** for \`${{ github.sha }}\`
