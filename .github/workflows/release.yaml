@@ -23,7 +23,7 @@ jobs:
     needs: build_and_test
     steps:
       - name: Get release metadata
-        run: curl -fsSl https://api.github.com/repos/${{github.repository}}/releases/tag/${{ github.ref_name }} > release.json
+        run: curl -fsSl https://api.github.com/repos/${{github.repository}}/releases/tags/${{ github.ref_name }} > release.json
       - name: Format twist message
         shell: bash
         run: |
