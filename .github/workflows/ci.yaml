@@ -23,14 +23,14 @@ jobs:
     if: ${{ always() }}
     needs: build_and_test
     steps:
+      - run: echo ${{ needs.build_and_test.result == 'success' && '✅' || '❌'}} ${{ github.repository }} [${{ github.base_ref || github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) deploy **${{ needs.build_and_test.result }}** for `${{ github.sha }}` > message
+      - run: echo {\"body\":\"${{ github.event.head_commit.message }}\"} | jq -c . > release.json
+      - run: cat release.json | jq '("\n\n```\n" + .body' + "\n```")' >> message
+      - run: jq -c --rawfile message message -n -- '{content:$message}' > payload.json
       - name: Send twist notification
-        uses: Doist/twist-post-action@master
-        with:
-          message: |-
-            ${{ needs.build_and_test.result == 'success' && '✅' || '❌'}} ${{ github.repository }} [${{ github.base_ref || github.ref_name }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) deploy **${{ needs.build_and_test.result }}** for `${{ github.sha }}`
-
-            ```
-            ${{ github.event.head_commit.message }}
-            ```
-          install_id: ${{ secrets.TWIST_INTEGRATION_INSTALL_ID }}
-          install_token: ${{ secrets.TWIST_INTEGRATION_INSTALL_TOKEN }}
+        shell: bash
+        run: >
+          curl --fail --silent --header "Content-Type: application/json"
+          --request POST
+          --data @payload.json
+          "https://twist.com/api/v3/integration_incoming/post_data?install_id=${{ secrets.TWIST_INTEGRATION_INSTALL_ID }}&install_token=${{ secrets.TWIST_INTEGRATION_INSTALL_TOKEN }}"
